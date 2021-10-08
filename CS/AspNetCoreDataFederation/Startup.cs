@@ -30,50 +30,64 @@ namespace AspNetCoreDataFederation {
             services
                 .AddResponseCompression()
                 .AddDevExpressControls()
-                .AddMvc()
+                .AddMvc();
 
-                .AddDefaultDashboardController((configurator, serviceProvider)  => {
-                    configurator.SetConnectionStringsProvider(new DashboardConnectionStringsProvider(Configuration));
+            services.AddScoped<DashboardConfigurator>((IServiceProvider serviceProvider) => {
+                DashboardConfigurator configurator = new DashboardConfigurator();
+                configurator.SetConnectionStringsProvider(new DashboardConnectionStringsProvider(Configuration));
 
-                    DashboardFileStorage dashboardFileStorage = new DashboardFileStorage(FileProvider.GetFileInfo("Data/Dashboards").PhysicalPath);
-                    configurator.SetDashboardStorage(dashboardFileStorage);
+                DashboardFileStorage dashboardFileStorage = new DashboardFileStorage(FileProvider.GetFileInfo("Data/Dashboards").PhysicalPath);
+                configurator.SetDashboardStorage(dashboardFileStorage);
 
-                    DataSourceInMemoryStorage dataSourceStorage = new DataSourceInMemoryStorage();
+                DataSourceInMemoryStorage dataSourceStorage = new DataSourceInMemoryStorage();
 
-                    // Configures an SQL data source.
-                    DashboardSqlDataSource sqlDataSource = new DashboardSqlDataSource("SQL Data Source", "NWindConnectionString");
-                    sqlDataSource.DataProcessingMode = DataProcessingMode.Client;
-                    SelectQuery query = SelectQueryFluentBuilder
-                        .AddTable("Orders")
-                        .SelectAllColumnsFromTable()
-                        .Build("SQL Orders");
-                    sqlDataSource.Queries.Add(query);
+                // Configures an SQL data source.
+                DashboardSqlDataSource sqlDataSource = new DashboardSqlDataSource("SQL Data Source", "NWindConnectionString");
+                sqlDataSource.DataProcessingMode = DataProcessingMode.Client;
+                SelectQuery query = SelectQueryFluentBuilder
+                    .AddTable("Orders")
+                    .SelectAllColumnsFromTable()
+                    .Build("SQL Orders");
+                sqlDataSource.Queries.Add(query);
 
-                    // Configures an Object data source.
-                    DashboardObjectDataSource objDataSource = new DashboardObjectDataSource("Object Data Source");
+                // Configures an Object data source.
+                DashboardObjectDataSource objDataSource = new DashboardObjectDataSource("Object Data Source");
 
-                    // Configures an Excel data source.
-                    DashboardExcelDataSource excelDataSource = new DashboardExcelDataSource("Excel Data Source");
-                    excelDataSource.FileName = FileProvider.GetFileInfo("Data/SalesPerson.xlsx").PhysicalPath;
-                    excelDataSource.SourceOptions = new ExcelSourceOptions(new ExcelWorksheetSettings("Data"));
+                // Configures an Excel data source.
+                DashboardExcelDataSource excelDataSource = new DashboardExcelDataSource("Excel Data Source");
+                excelDataSource.FileName = FileProvider.GetFileInfo("Data/SalesPerson.xlsx").PhysicalPath;
+                excelDataSource.SourceOptions = new ExcelSourceOptions(new ExcelWorksheetSettings("Data"));
 
-                    // Configures a JSON data source.
-                    DashboardJsonDataSource jsonDataSource = new DashboardJsonDataSource("JSON Data Source");
-                    Uri fileUri = new Uri(FileProvider.GetFileInfo("Data/Categories.json").PhysicalPath, UriKind.RelativeOrAbsolute);
-                    jsonDataSource.JsonSource = new UriJsonSource(fileUri);
+                // Configures a JSON data source.
+                DashboardJsonDataSource jsonDataSource = new DashboardJsonDataSource("JSON Data Source");
+                Uri fileUri = new Uri(FileProvider.GetFileInfo("Data/Categories.json").PhysicalPath, UriKind.RelativeOrAbsolute);
+                jsonDataSource.JsonSource = new UriJsonSource(fileUri);
 
-                    // Registers a Federated data source.
-                    dataSourceStorage.RegisterDataSource("federatedDataSource", CreateFederatedDataSource(sqlDataSource, 
-                        excelDataSource, objDataSource, jsonDataSource).SaveToXml());
+                // Registers a Federated data source.
+                dataSourceStorage.RegisterDataSource("federatedDataSource", CreateFederatedDataSource(sqlDataSource,
+                    excelDataSource, objDataSource, jsonDataSource).SaveToXml());
 
-                    configurator.SetDataSourceStorage(dataSourceStorage);
+                configurator.SetDataSourceStorage(dataSourceStorage);
 
-                    configurator.DataLoading += (s, e) => {
-                        if(e.DataSourceName == "Object Data Source") {
-                            e.Data = Invoices.CreateData();
-                        }
-                    };
-                });
+                configurator.DataLoading += (s, e) => {
+                    if(e.DataSourceName == "Object Data Source") {
+                        e.Data = Invoices.CreateData();
+                    }
+                };
+
+                configurator.ConfigureDataConnection += (s, e) => {
+                    if(e.DataSourceName == "Excel Data Source") {
+                        (e.ConnectionParameters as ExcelDataSourceConnectionParameters).FileName = FileProvider.GetFileInfo("Data/SalesPerson.xlsx").PhysicalPath;
+                    }
+                    else if(e.DataSourceName == "JSON Data Source") {
+                        UriJsonSource uriSource = (e.ConnectionParameters as JsonSourceConnectionParameters).JsonSource as UriJsonSource;
+                        uriSource.Uri = new Uri(FileProvider.GetFileInfo("Data/Categories.json").PhysicalPath, UriKind.RelativeOrAbsolute);
+                    }
+
+                };
+
+                return configurator;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -92,7 +106,7 @@ namespace AspNetCoreDataFederation {
 
             app.UseRouting();
             app.UseEndpoints(endpoints => {
-                EndpointRouteBuilderExtension.MapDashboardRoute(endpoints, "dashboardControl");
+                EndpointRouteBuilderExtension.MapDashboardRoute(endpoints, "api/dashboard", "DefaultDashboard");
                 endpoints.MapRazorPages();
                 endpoints.MapControllerRoute(
                     name: "default",
