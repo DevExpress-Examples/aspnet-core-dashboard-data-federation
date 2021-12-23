@@ -52,14 +52,17 @@ namespace AspNetCoreDataFederation {
 
                 // Configures an Object data source.
                 DashboardObjectDataSource objDataSource = new DashboardObjectDataSource("Object Data Source");
+                objDataSource.DataId = "odsInvoices";
 
                 // Configures an Excel data source.
                 DashboardExcelDataSource excelDataSource = new DashboardExcelDataSource("Excel Data Source");
+                excelDataSource.ConnectionName = "excelSales";
                 excelDataSource.FileName = FileProvider.GetFileInfo("Data/SalesPerson.xlsx").PhysicalPath;
                 excelDataSource.SourceOptions = new ExcelSourceOptions(new ExcelWorksheetSettings("Data"));
 
                 // Configures a JSON data source.
                 DashboardJsonDataSource jsonDataSource = new DashboardJsonDataSource("JSON Data Source");
+                jsonDataSource.ConnectionName = "jsonCategories";
                 Uri fileUri = new Uri(FileProvider.GetFileInfo("Data/Categories.json").PhysicalPath, UriKind.RelativeOrAbsolute);
                 jsonDataSource.JsonSource = new UriJsonSource(fileUri);
 
@@ -70,20 +73,19 @@ namespace AspNetCoreDataFederation {
                 configurator.SetDataSourceStorage(dataSourceStorage);
 
                 configurator.DataLoading += (s, e) => {
-                    if(e.DataSourceName == "Object Data Source") {
+                    if(e.DataId == "odsInvoices") {
                         e.Data = Invoices.CreateData();
                     }
                 };
 
                 configurator.ConfigureDataConnection += (s, e) => {
-                    if(e.DataSourceName == "Excel Data Source") {
+                    if(e.ConnectionName == "excelSales") {
                         (e.ConnectionParameters as ExcelDataSourceConnectionParameters).FileName = FileProvider.GetFileInfo("Data/SalesPerson.xlsx").PhysicalPath;
                     }
-                    else if(e.DataSourceName == "JSON Data Source") {
+                    else if(e.ConnectionName == "jsonCategories") {
                         UriJsonSource uriSource = (e.ConnectionParameters as JsonSourceConnectionParameters).JsonSource as UriJsonSource;
                         uriSource.Uri = new Uri(FileProvider.GetFileInfo("Data/Categories.json").PhysicalPath, UriKind.RelativeOrAbsolute);
                     }
-
                 };
 
                 return configurator;
