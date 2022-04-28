@@ -83,8 +83,8 @@ namespace AspNetCoreDataFederation {
                         (e.ConnectionParameters as ExcelDataSourceConnectionParameters).FileName = FileProvider.GetFileInfo("Data/SalesPerson.xlsx").PhysicalPath;
                     }
                     else if(e.ConnectionName == "jsonCategories") {
-                        UriJsonSource uriSource = (e.ConnectionParameters as JsonSourceConnectionParameters).JsonSource as UriJsonSource;
-                        uriSource.Uri = new Uri(FileProvider.GetFileInfo("Data/Categories.json").PhysicalPath, UriKind.RelativeOrAbsolute);
+                        UriJsonSource source = new UriJsonSource(new Uri(FileProvider.GetFileInfo("Data/Categories.json").PhysicalPath, UriKind.RelativeOrAbsolute));
+                        (e.ConnectionParameters as JsonSourceConnectionParameters).JsonSource = source;
                     }
                 };
 

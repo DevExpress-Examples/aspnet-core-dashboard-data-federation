@@ -102,7 +102,7 @@
       </Query>
       <ConnectionOptions CloseConnection="true" />
     </SqlDataSource>
-    <ExcelDataSource Name="Excel Data Source" FileName="D:\work\projects\AspNetCoreDataFederation\AspNetCoreDataFederation\Data\SalesPerson.xlsx" ComponentName="excelDataSource1" ConnectionName="excelSales">
+    <ExcelDataSource Name="Excel Data Source" ComponentName="excelDataSource1" ConnectionName="excelSales">
       <Options Type="DevExpress.DataAccess.Excel.ExcelSourceOptions" SkipEmptyRows="true" UseFirstRowAsHeader="true" SkipHiddenColumns="true" SkipHiddenRows="true">
         <ImportSettings Type="DevExpress.DataAccess.Excel.ExcelWorksheetSettings" WorksheetName="Data" />
       </Options>
@@ -110,9 +110,7 @@
       <ResultSchema />
     </ExcelDataSource>
     <ObjectDataSource Name="Object Data Source" ComponentName="objectDataSource1" DataId="odsInvoices" />
-    <JsonDataSource Name="JSON Data Source" ComponentName="jsonDataSource1" ConnectionName="jsonCategories">
-      <Source SourceType="DevExpress.DataAccess.Json.UriJsonSource" Uri="file:///D:/work/projects/AspNetCoreDataFederation/AspNetCoreDataFederation/Data/Categories.json" />
-    </JsonDataSource>
+    <JsonDataSource Name="JSON Data Source" ComponentName="jsonDataSource1" ConnectionName="jsonCategories"></JsonDataSource>
   </DataSources>
   <Items>
     <Chart ComponentName="chartDashboardItem1" Name="Chart 1" DataSource="federationDataSource1" DataMember="Join query">
