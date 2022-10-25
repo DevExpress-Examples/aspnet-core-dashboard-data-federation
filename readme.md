@@ -13,9 +13,7 @@ This example registers the [DashboardFederationDataSource](https://docs.devexpre
 * [DashboardObjectDataSource](https://docs.devexpress.com/Dashboard/401435)
 * [DashboardJsonDataSource](https://docs.devexpress.com/Dashboard/401431)
 
-## Files to Look At
 
-* [DashboardConfig.cs](./CS/AspNetCoreDataFederation/Startup.cs)
 
 The federated data source is stored in the in-memory storage ([DataSourceInMemoryStorage](https://docs.devexpress.com/Dashboard/DevExpress.DashboardWeb.DataSourceInMemoryStorage)) and is available from the [Add Data Source](https://docs.devexpress.com/Dashboard/117456/web-dashboard/create-dashboards-on-the-web/providing-data/manage-data-sources) dialog. Note that when you add a federated data source to a dashboard, all data sources used in the federated data source are also added to the dashboard.
 
@@ -34,6 +32,10 @@ This example demonstrates the following query types you can use to create a data
 * **Transformation**
 
     If a data source contains a complex column (an object), you can transform its properties to display them as separate columns in a flattened view. If one of the data columns is an array, you can unfold its values and display a new data row for every element of the array. When you unfold the column, you can flatten it and create a flattened view
+    
+## Files to Review
+
+* [Startup.cs](./CS/AspNetCoreDataFederation/Startup.cs)
 
 ## Documentation
 
